@@ -1,0 +1,36 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+configurations {
+	pluginjar
+}
+
+project.ext {
+	pluginId = "azure"
+	pluginName = "azure"
+	pluginVersion = "0.1.0-alpha"
+	pluginDate = new Date()
+	pluginAppMinVersion = "0.4.5-alpha"
+	pluginRelease = rootProject.ext.applicationRelease
+	pluginConflictsWith = ""
+
+	pluginVersionSnapshot = rootProject.ext.applicationVersionSnapshot
+	pluginVersionFull = "${pluginVersion}${pluginVersionSnapshot}"
+	pluginNeedsOperatingSystemAndArchitecture = false
+}
+
+dependencies {
+	compile		project(":syncany-lib")
+	compile		project(":syncany-util")
+
+    compile     "com.microsoft.azure:azure-storage:2.2.0"
+
+    pluginjar   "com.microsoft.azure:azure-storage:2.2.0"
+
+	testCompile	project(path: ":syncany-lib", configuration: "tests")
+	testCompile	project(path: ":syncany-util", configuration: "tests")
+	testCompile	"junit:junit:4.9"
+	testCompile	"org.apache.ftpserver:ftpserver-core:1.0.6"
+}
+
+apply from: 'core/gradle/gradle/plugins.jar.gradle'
