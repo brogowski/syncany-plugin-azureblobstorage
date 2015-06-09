@@ -50,13 +50,13 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
             cloudBlobClient = cloudStorageAccount.createCloudBlobClient();
             container = cloudBlobClient.getContainerReference(settings.getContainerName());
         } catch (URISyntaxException e) {
-            logger.log(Level.SEVERE, "Could not parse azureblobstorage storage connection string. (Invalid Uri)", e);
+            logger.log(Level.SEVERE, "Azure: Could not parse azureblobstorage storage connection string. (Invalid Uri)", e);
             throw new StorageException("Wrong connection string.");
         } catch (InvalidKeyException e) {
-            logger.log(Level.SEVERE, "Could not parse azureblobstorage storage connection string. (Invalid Key)", e);
+            logger.log(Level.SEVERE, "Azure: Could not parse azureblobstorage storage connection string. (Invalid Key)", e);
             throw new StorageException("Wrong connection string.");
         } catch (com.microsoft.azure.storage.StorageException e) {
-            logger.log(Level.SEVERE, "Could not get container reference for: " + settings.getContainerName(), e);
+            logger.log(Level.SEVERE, "Azure: Could not get container reference for: " + settings.getContainerName(), e);
             throw new StorageException("Wrong container name.");
         }
     }
@@ -90,7 +90,7 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
                 this.container.create();
             }
         } catch (Exception e) {
-            throw new StorageException("init: Cannot create required directories", e);
+            throw new StorageException("init: Cannot create container", e);
         } finally {
             disconnect();
         }
@@ -103,13 +103,16 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
 
     private void tryDownloadBlobToFile(RemoteFile remoteFile, File localFile) throws StorageException {
         if (!remoteFile.getName().equals(".") && !remoteFile.getName().equals("..")) {
+            if (logger.isLoggable(Level.INFO)) {
+                logger.log(Level.INFO, "Azure: Downloading from {0} to {1}", new Object[]{remoteFile, localFile});
+            }
             try {
                 File tempFile = createTempFile(localFile.getName());
                 downloadBlobToFile(tempFile, getRemoteFileFullPath(remoteFile));
                 moveToDestinationFile(tempFile, localFile);
                 tempFile.delete();
             } catch (IOException e) {
-                logger.log(Level.SEVERE, "Error while downloading file " + remoteFile.getName(), e);
+                logger.log(Level.SEVERE, "Azure: Error while downloading file " + remoteFile.getName(), e);
                 throw new StorageException(e);
             }
         }
@@ -131,6 +134,7 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
         try {
             blob.downloadToFile(tempFile.getAbsolutePath());
         } catch (com.microsoft.azure.storage.StorageException e) {
+            logger.log(Level.SEVERE, "Azure: Error while downloading file " + remotePath, e);
             throw new StorageException(e);
         }
     }
@@ -155,6 +159,10 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
 
         tryMoveBlob(tempBlob, targetBlob);
 
+        if (logger.isLoggable(Level.INFO)) {
+            logger.log(Level.INFO, "Azure: deleting temp file {0}", new Object[]{tempRemotePath});
+        }
+
         tryDeleteBlob(tempBlob);
     }
 
@@ -162,6 +170,7 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
         try {
             blob.delete();
         } catch (com.microsoft.azure.storage.StorageException e) {
+            logger.log(Level.SEVERE, "Azure: Error while deleting file", e);
             throw new StorageException(e);
         }
     }
@@ -171,8 +180,10 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
             targetBlob.startCopyFromBlob(sourceBlob);
             waitForCopy(targetBlob);
         } catch (URISyntaxException e) {
+            logger.log(Level.SEVERE, "Azure: Error while moving file", e);
             throw new StorageException(e);
         } catch (com.microsoft.azure.storage.StorageException e) {
+            logger.log(Level.SEVERE, "Azure: Error while moving file", e);
             throw new StorageException(e);
         }
     }
@@ -184,10 +195,17 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
+                logger.log(Level.SEVERE, "Azure: Moving interrupted: " + copyState.getStatus(), e);
                 throw new StorageException("Copying interrupted.");
             }
         } while (copyState.getStatus() == CopyStatus.UNSPECIFIED || copyState.getStatus() == CopyStatus.PENDING);
+
+        if (logger.isLoggable(Level.INFO)) {
+            logger.log(Level.INFO, "Azure: Copy status: " + copyState.getStatus());
+        }
+
         if (copyState.getStatus() != CopyStatus.SUCCESS) {
+            logger.log(Level.SEVERE, "Azure: Copying file failed");
             throw new StorageException("Copying failed.");
         }
     }
@@ -196,10 +214,13 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
         try {
             blob.upload(new FileInputStream(localFile), localFile.length());
         } catch (com.microsoft.azure.storage.StorageException e) {
+            logger.log(Level.SEVERE, "Azure: Uploading file failed " + localFile, e);
             throw new StorageException(e);
         } catch (FileNotFoundException e) {
+            logger.log(Level.SEVERE, "Azure: Uploading file failed " + localFile, e);
             throw new StorageException(e);
         } catch (IOException e) {
+            logger.log(Level.SEVERE, "Azure: Uploading file failed " + localFile, e);
             throw new StorageException(e);
         }
     }
@@ -208,9 +229,14 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
     public boolean delete(RemoteFile remoteFile) throws StorageException {
         String remotePath = getRemoteFileFullPath(remoteFile);
 
+        if (logger.isLoggable(Level.INFO)) {
+            logger.log(Level.INFO, "Azure: Deleting file: " + remoteFile);
+        }
+
         try {
             tryDeleteBlob(getCloudBlockBlob(remotePath));
         } catch (StorageException e) {
+            logger.log(Level.SEVERE, "Azure: Deleting file failed: " + remoteFile, e);
             return false;
         }
         return true;
@@ -224,7 +250,16 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
         CloudBlockBlob sourceBlob = getCloudBlockBlob(sourceRemotePath);
         CloudBlockBlob targetBlob = getCloudBlockBlob(targetRemotePath);
 
+        if (logger.isLoggable(Level.INFO)) {
+            logger.log(Level.INFO, "Azure: Moving {0} to {1}", new Object[]{sourceFile, targetFile});
+        }
+
         tryMoveBlob(sourceBlob, targetBlob);
+
+        if (logger.isLoggable(Level.INFO)) {
+            logger.log(Level.INFO, "Azure: Deleting " + sourceFile);
+        }
+
         delete(sourceFile);
     }
 
@@ -233,10 +268,10 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
         try {
             sourceBlob = this.container.getBlockBlobReference(sourceRemotePath);
         } catch (URISyntaxException e) {
-            logger.log(Level.SEVERE, "Error while getting blob reference " + sourceRemotePath, e);
+            logger.log(Level.SEVERE, "Azure: Error while getting blob reference " + sourceRemotePath, e);
             throw new StorageException(e);
         } catch (com.microsoft.azure.storage.StorageException e) {
-            logger.log(Level.SEVERE, "Error while getting blob reference " + sourceRemotePath, e);
+            logger.log(Level.SEVERE, "Azure: Error while getting blob reference " + sourceRemotePath, e);
             throw new StorageException(e);
         }
         return sourceBlob;
@@ -289,17 +324,17 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
 
                 tempFile.delete();
 
-                logger.log(Level.INFO, "testTargetCanWrite: Can write, test file created/deleted successfully.");
+                logger.log(Level.INFO, "Azure: testTargetCanWrite: Can write, test file created/deleted successfully.");
                 return true;
             } else {
-                logger.log(Level.INFO, "testTargetCanWrite: Can NOT write, target does not exist.");
+                logger.log(Level.INFO, "Azure: testTargetCanWrite: Can NOT write, target does not exist.");
                 return false;
             }
         } catch (IOException e) {
-            logger.log(Level.INFO, "testTargetCanWrite: Can NOT write to target.", e);
+            logger.log(Level.INFO, "Azure: testTargetCanWrite: Can NOT write to target.", e);
             return false;
         } catch (StorageException e) {
-            logger.log(Level.INFO, "testTargetCanWrite: Can NOT write to target.", e);
+            logger.log(Level.INFO, "Azure: testTargetCanWrite: Can NOT write to target.", e);
             return false;
         }
     }
@@ -308,10 +343,10 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
     public boolean testTargetExists() {
         try {
             if (this.container.exists()) {
-                logger.log(Level.INFO, "testTargetExists: Target does exist.");
+                logger.log(Level.INFO, "Azure: testTargetExists: Target does exist.");
                 return true;
             } else {
-                logger.log(Level.INFO, "testTargetExists: Target does NOT exist.");
+                logger.log(Level.INFO, "Azure: testTargetExists: Target does NOT exist.");
                 return false;
             }
         } catch (com.microsoft.azure.storage.StorageException e) {
@@ -330,14 +365,14 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
             String repoFilePath = getRemoteFileFullPath(new SyncanyRemoteFile());
 
             if (getCloudBlockBlob(repoFilePath).exists()) {
-                logger.log(Level.INFO, "testRepoFileExists: Repo file exists at " + repoFilePath);
+                logger.log(Level.INFO, "Azure: testRepoFileExists: Repo file exists at " + repoFilePath);
                 return true;
             } else {
-                logger.log(Level.INFO, "testRepoFileExists: Repo file DOES NOT exist at " + repoFilePath);
+                logger.log(Level.INFO, "Azure: testRepoFileExists: Repo file DOES NOT exist at " + repoFilePath);
                 return false;
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "testRepoFileExists: Exception when trying to check repo file existence.", e);
+            logger.log(Level.INFO, "Azure: testRepoFileExists: Exception when trying to check repo file existence.", e);
             return false;
         }
     }
