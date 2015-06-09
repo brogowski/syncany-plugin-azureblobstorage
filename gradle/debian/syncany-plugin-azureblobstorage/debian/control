@@ -1,0 +1,17 @@
+Source: syncany-plugin-azureblobstorage
+Section: utils
+Priority: extra
+Maintainer: Bart³omiej Rogowski <bartlomiej.rogowski@gmail.com>
+Build-Depends: bash-completion, debhelper (>= 8.0.0) | debhelper (>= 9.0.0)
+Standards-Version: 3.9.4
+Homepage: https://github.com/brogowski
+
+Package: syncany-plugin-azureblobstorage
+Architecture: ${pluginDebianArchitecture}
+Depends: ${pluginMiscDepends}, syncany (>= ${pluginAppMinVersion})
+Homepage: https://github.com/brogowski
+Description: Azure blob storage plugin for Syncany
+ This plugin makes it possible to use a Azure Blob Storage container as a backend 
+ for Syncany. 
+ .
+ The package relies on the original Syncany package.
