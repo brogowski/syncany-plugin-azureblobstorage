@@ -1,6 +1,9 @@
 language: java
 jdk: openjdk7
 
+before_install:
+ - chmod +x gradlew
+
 env:
   global:
   - TERM=dumb
