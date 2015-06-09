@@ -9,3 +9,7 @@ build
 gradle/arch/syncany/pkg
 gradle/arch/syncany/src
 gradle/arch/syncany/syncany*.tar*
+
+#IntelliJ IDEA
+.idea/
+*.iml

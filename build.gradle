@@ -6,9 +6,9 @@ configurations {
 }
 
 project.ext {
-	pluginId = "azure"
-	pluginName = "azure"
-	pluginVersion = "0.1.0-alpha"
+	pluginId = "azureblobstorage"
+	pluginName = "azureblobstorage"
+	pluginVersion = "0.4.5-alpha"
 	pluginDate = new Date()
 	pluginAppMinVersion = "0.4.5-alpha"
 	pluginRelease = rootProject.ext.applicationRelease

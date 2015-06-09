@@ -1,4 +1,4 @@
-package org.syncany.plugins.azure;
+package org.syncany.plugins.azureblobstorage;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Validate;
@@ -7,8 +7,7 @@ import org.syncany.plugins.transfer.Setup;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferSettings;
 
-
-public class AzureBlobStorageTransferSettings extends TransferSettings {
+public class AzureblobstorageTransferSettings extends TransferSettings {
 
     @Element(name = "accountName", required = true)
     @Setup(order = 1, description = "Account name")
@@ -45,6 +44,12 @@ public class AzureBlobStorageTransferSettings extends TransferSettings {
 
     @Validate
     public void ValidateSettings() throws StorageException {
+        if(accountName == null)
+            throw new StorageException("Account Name cannot be null.");
+        if(accountKey == null)
+            throw new StorageException("Account Key cannot be null.");
+        if(containerName == null)
+            throw new StorageException("Container name cannot be null.");
         if(!containerName.equals(containerName.toLowerCase()))
             throw new StorageException("Container name must be lower case only.");
     }
