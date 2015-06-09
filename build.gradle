@@ -9,6 +9,7 @@ project.ext {
 	pluginId = "azureblobstorage"
 	pluginName = "azureblobstorage"
 	pluginVersion = "0.4.6-alpha"
+    pluginDebianVersion = "1"
 	pluginDate = new Date()
 	pluginAppMinVersion = "0.4.6-alpha"
 	pluginRelease = rootProject.ext.applicationRelease
@@ -34,3 +35,4 @@ dependencies {
 }
 
 apply from: 'core/gradle/gradle/plugins.jar.gradle'
+apply from: 'core/gradle/gradle/plugins.debian.gradle'

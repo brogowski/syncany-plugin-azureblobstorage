@@ -1,0 +1,40 @@
+language: java
+jdk: openjdk7
+
+env:
+  global:
+  - TERM=dumb
+
+  # Encrypted env variable SYNCANY_API_KEY for upload
+  # - secure: ""
+
+branches:
+  only:
+  - master
+
+before_install:
+  # Standard Stuff
+  - sudo apt-get update
+  - mkdir ~/.gradle 2> /dev/null || true
+  - echo "org.gradle.daemon=true" > ~/.gradle/gradle.properties
+
+  # Debian Packaging
+  - sudo apt-get install -y -q dh-make devscripts debhelper bash-completion
+  - gpg --version
+  - debuild --version
+  - perl -v
+
+install:
+  # Disable default travis behavior 'gradle assemble'
+  - ./gradlew -v
+
+script:
+  # Be safe and clean!
+  - ./gradlew clean
+
+  # Build JAR and Debian DEB
+  - ./gradlew pluginJar
+  - ./gradlew pluginDebianDeb
+
+  # Upload JARs and DEBs
+  # - core/gradle/upload/upload-plugin.sh
