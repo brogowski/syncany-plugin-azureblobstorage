@@ -1,4 +1,4 @@
-package org.syncany.tests.plugin.azureblobstorage;
+package org.syncany.tests.plugin.azure;
 
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.files.RemoteFile;

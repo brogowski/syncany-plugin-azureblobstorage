@@ -6,11 +6,12 @@ env:
   - TERM=dumb
 
   # Encrypted env variable SYNCANY_API_KEY for upload
-  # - secure: ""
+  - secure: "rTWXeZITNgxggcrzJcZZZqov5FjVQUkFGcg5wf7NAUTbKu7XS4x61lDKI8xulfnXA8Ui2uZT2f+K8Rexu/TxVZoLZxLtd6k5KYzh8xvaD9pSLn5Po2ObFJ/CMK+sp9C7hkBuLPXmnpi+9+4J3Etp7pg7mQqHeWx53Nlgs9nLFD+UUytVU3AfGr+GUWWt55eraCb917x/Iy96gJWDB+me9pfX5bJWH4mrbZIDhQ8d7fP/bIifVr6/MMppxvYWAQM7zzzCWv0SzbSgA3bjqsFP5GhO4lz8LNlHuE+BIjI9tRmpwWVhM0f21+c7jMyNpKn8yJX0FtEcneSiSoNlbmPrFKsJAHV1yRx6W3w1a7kZb7ddFZ2XGAoBJgSFKi2tGd9dGruXp3dIa48shU/f5TKRm8nmQqnN9oT0AOOgKKjH+4dQN0O7n1yXVCNIFpRyl065wg3rq+2d7QtrOPrUO+CowUPQJRWQ9ZUHN6/yqBEd2gtGioWtngGzBkMOYKOx9V8Z3eNWjE3EzZFi2Bw2dzkN34rbWxxrfiXdpkcXC4pGNkk27DlBeuR6YCmkYqfNA4Ue1zsHnPmJH7bQMH0368uLebd6bwKgusdkDdQ7A+XnyrI+S3V9aUmg//kKr3QHFZGw2Zn1xaxzNXESga6r73CnR+KmhIzycV9F2i5yJUAewFs="
 
 branches:
   only:
   - master
+  - develop
 
 before_install:
   - chmod +x gradlew
@@ -38,4 +39,4 @@ script:
   - ./gradlew pluginDebianDeb
 
   # Upload JARs and DEBs
-  # - core/gradle/upload/upload-plugin.sh
+  - core/gradle/upload/upload-plugin.sh

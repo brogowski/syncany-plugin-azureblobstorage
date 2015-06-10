@@ -1,4 +1,4 @@
-package org.syncany.tests.plugin.azureblobstorage;
+package org.syncany.tests.plugin.azure;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -8,9 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.syncany.plugins.Plugin;
 import org.syncany.plugins.Plugins;
-import org.syncany.plugins.azureblobstorage.AzureblobstorageTransferManager;
-import org.syncany.plugins.azureblobstorage.AzureblobstorageTransferPlugin;
-import org.syncany.plugins.azureblobstorage.AzureblobstorageTransferSettings;
+import org.syncany.plugins.azure.AzureTransferManager;
+import org.syncany.plugins.azure.AzureTransferPlugin;
+import org.syncany.plugins.azure.AzureTransferSettings;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.TransferPlugin;
@@ -18,17 +18,16 @@ import org.syncany.plugins.transfer.TransferPlugin;
 import java.io.*;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
-public class AzureblobstoragePluginTest {
+public class AzurePluginTest {
     private static final int TEST_FILE_SIZE = 1024 * 1024;
-    private static final String PLUGIN_NAME = "azureblobstorage";
+    private static final String PLUGIN_NAME = "azure";
     private static final String DEVELOPMENT_STORAGE_CONNECTION_STRING = "UseDevelopmentStorage=true;";
     private static final String CONTAINER_NAME = "syncanytest";
 
-    private AzureblobstorageTransferSettings validTransferSettings;
+    private AzureTransferSettings validTransferSettings;
     private CloudBlobContainer container;
 
     @Before
@@ -65,7 +64,7 @@ public class AzureblobstoragePluginTest {
         Plugin pluginInfo = Plugins.get(PLUGIN_NAME);
 
         assertNotNull("PluginInfo should not be null.", pluginInfo);
-        assertEquals("Plugin ID should be 'azureblobstorage'.", PLUGIN_NAME, pluginInfo.getId());
+        assertEquals("Plugin ID should be 'azure'.", PLUGIN_NAME, pluginInfo.getId());
         assertNotNull("Plugin version should not be null.", pluginInfo.getVersion());
         assertNotNull("Plugin name should not be null.", pluginInfo.getName());
     }
@@ -74,7 +73,7 @@ public class AzureblobstoragePluginTest {
     public void testCannotCreatePluginWithIncorrectSettings() throws Exception {
         TransferPlugin pluginInfo = Plugins.get(PLUGIN_NAME, TransferPlugin.class);
 
-        AzureblobstorageTransferSettings settings = pluginInfo.createEmptySettings();
+        AzureTransferSettings settings = pluginInfo.createEmptySettings();
         TransferManager transferManager = pluginInfo.createTransferManager(settings, null);
     }
 
@@ -82,7 +81,7 @@ public class AzureblobstoragePluginTest {
     public void testCannotCreatePluginWithIncorrectCredentials() throws Exception {
         TransferPlugin pluginInfo = Plugins.get(PLUGIN_NAME, TransferPlugin.class);
 
-        AzureblobstorageTransferSettings settings = pluginInfo.createEmptySettings();
+        AzureTransferSettings settings = pluginInfo.createEmptySettings();
         validTransferSettings.accountKey = "wrong-key";
         validTransferSettings.accountName = "wrong-name";
         validTransferSettings.containerName = "syncany-test";
@@ -211,9 +210,9 @@ public class AzureblobstoragePluginTest {
 
         TransferManager transferManager = pluginInfo.createTransferManager(validTransferSettings, null);
 
-        assertEquals("AzureblobstoragePlugin expected.", AzureblobstorageTransferPlugin.class, pluginInfo.getClass());
-        assertEquals("AzureblobstorageConnection expected.", AzureblobstorageTransferSettings.class, validTransferSettings.getClass());
-        assertEquals("AzureblobstorageTransferManager expected.", AzureblobstorageTransferManager.class, transferManager.getClass());
+        assertEquals("AzureblobstoragePlugin expected.", AzureTransferPlugin.class, pluginInfo.getClass());
+        assertEquals("AzureblobstorageConnection expected.", AzureTransferSettings.class, validTransferSettings.getClass());
+        assertEquals("AzureblobstorageTransferManager expected.", AzureTransferManager.class, transferManager.getClass());
 
         return transferManager;
     }

@@ -1,4 +1,4 @@
-package org.syncany.plugins.azureblobstorage;
+package org.syncany.plugins.azure;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Validate;
@@ -7,7 +7,7 @@ import org.syncany.plugins.transfer.Setup;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferSettings;
 
-public class AzureblobstorageTransferSettings extends TransferSettings {
+public class AzureTransferSettings extends TransferSettings {
 
     @Element(name = "accountName", required = true)
     @Setup(order = 1, description = "Account name")

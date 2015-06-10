@@ -1,16 +1,15 @@
-package org.syncany.plugins.azureblobstorage;
+package org.syncany.plugins.azure;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.syncany.config.Config;
 import org.syncany.plugins.transfer.AbstractTransferManager;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
 import org.syncany.plugins.transfer.features.ReadAfterWriteConsistentFeatureExtension;
 import org.syncany.plugins.transfer.files.*;
-import org.syncany.plugins.azureblobstorage.AzureblobstorageTransferManager.AzureBlobStorageReadAfterWriteConsistentFeatureExtension;
+import org.syncany.plugins.azure.AzureTransferManager.AzureReadAfterWriteConsistentFeatureExtension;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,9 +22,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@ReadAfterWriteConsistent(extension = AzureBlobStorageReadAfterWriteConsistentFeatureExtension.class)
-public class AzureblobstorageTransferManager extends AbstractTransferManager {
-    private static final Logger logger = Logger.getLogger(AzureblobstorageTransferManager.class.getSimpleName());
+@ReadAfterWriteConsistent(extension = AzureReadAfterWriteConsistentFeatureExtension.class)
+public class AzureTransferManager extends AbstractTransferManager {
+    private static final Logger logger = Logger.getLogger(AzureTransferManager.class.getSimpleName());
     private static final String MULTICHUNKS_PATH = "/multichunks";
     private static final String DATABASES_PATH = "/databases";
     private static final String ACTIONS_PATH = "/actions";
@@ -36,7 +35,7 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
     private CloudBlobContainer container;
 
 
-    public AzureblobstorageTransferManager(AzureblobstorageTransferSettings settings, Config config) throws StorageException {
+    public AzureTransferManager(AzureTransferSettings settings, Config config) throws StorageException {
         super(settings, config);
 
         String connectionString = getConnectionString(settings);
@@ -44,16 +43,16 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
         trySetupContainer(settings, connectionString);
     }
 
-    private void trySetupContainer(AzureblobstorageTransferSettings settings, String connectionString) throws StorageException {
+    private void trySetupContainer(AzureTransferSettings settings, String connectionString) throws StorageException {
         try {
             CloudStorageAccount cloudStorageAccount = CloudStorageAccount.parse(connectionString);
             cloudBlobClient = cloudStorageAccount.createCloudBlobClient();
             container = cloudBlobClient.getContainerReference(settings.getContainerName());
         } catch (URISyntaxException e) {
-            logger.log(Level.SEVERE, "Azure: Could not parse azureblobstorage storage connection string. (Invalid Uri)", e);
+            logger.log(Level.SEVERE, "Azure: Could not parse azure storage connection string. (Invalid Uri)", e);
             throw new StorageException("Wrong connection string.");
         } catch (InvalidKeyException e) {
-            logger.log(Level.SEVERE, "Azure: Could not parse azureblobstorage storage connection string. (Invalid Key)", e);
+            logger.log(Level.SEVERE, "Azure: Could not parse azure storage connection string. (Invalid Key)", e);
             throw new StorageException("Wrong connection string.");
         } catch (com.microsoft.azure.storage.StorageException e) {
             logger.log(Level.SEVERE, "Azure: Could not get container reference for: " + settings.getContainerName(), e);
@@ -61,13 +60,13 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
         }
     }
 
-    private String getConnectionString(AzureblobstorageTransferSettings settings) {
+    private String getConnectionString(AzureTransferSettings settings) {
         return "DefaultEndpointsProtocol=" + getProtocol(settings) + ";"
                 + "AccountName=" + settings.getAccountName() + ";"
                 + "AccountKey=" + settings.getAccountKey();
     }
 
-    private String getProtocol(AzureblobstorageTransferSettings settings) {
+    private String getProtocol(AzureTransferSettings settings) {
         return settings.isHttpsUsed() ? "https" : "http";
     }
 
@@ -386,10 +385,10 @@ public class AzureblobstorageTransferManager extends AbstractTransferManager {
         return path;
     }
 
-    public static class AzureBlobStorageReadAfterWriteConsistentFeatureExtension implements ReadAfterWriteConsistentFeatureExtension {
-        private final AzureblobstorageTransferManager transferManager;
+    public static class AzureReadAfterWriteConsistentFeatureExtension implements ReadAfterWriteConsistentFeatureExtension {
+        private final AzureTransferManager transferManager;
 
-        public AzureBlobStorageReadAfterWriteConsistentFeatureExtension(AzureblobstorageTransferManager transferManager) {
+        public AzureReadAfterWriteConsistentFeatureExtension(AzureTransferManager transferManager) {
             this.transferManager = transferManager;
         }
 
