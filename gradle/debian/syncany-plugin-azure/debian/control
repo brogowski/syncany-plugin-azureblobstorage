@@ -1,12 +1,12 @@
-Source: syncany-plugin-azureblobstorage
+Source: syncany-plugin-azure
 Section: utils
 Priority: extra
-Maintainer: Bart³omiej Rogowski <bartlomiej.rogowski@gmail.com>
+Maintainer: Bartï¿½omiej Rogowski <bartlomiej.rogowski@gmail.com>
 Build-Depends: bash-completion, debhelper (>= 8.0.0) | debhelper (>= 9.0.0)
 Standards-Version: 3.9.4
 Homepage: https://github.com/brogowski
 
-Package: syncany-plugin-azureblobstorage
+Package: syncany-plugin-azure
 Architecture: ${pluginDebianArchitecture}
 Depends: ${pluginMiscDepends}, syncany (>= ${pluginAppMinVersion})
 Homepage: https://github.com/brogowski
