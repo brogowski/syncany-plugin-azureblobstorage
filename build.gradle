@@ -6,8 +6,8 @@ configurations {
 }
 
 project.ext {
-	pluginId = "azureblobstorage"
-	pluginName = "azureblobstorage"
+	pluginId = "azure"
+	pluginName = "Azure Blob Storage"
 	pluginVersion = "0.4.6-alpha"
     pluginDebianVersion = "1"
 	pluginDate = new Date()
